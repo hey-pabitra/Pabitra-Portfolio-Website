@@ -1,0 +1,743 @@
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pabitra Khandual · frontend architect</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Rajdhani', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              brand: {
+                dark: '#0f172a',
+                cyan: '#0ea5e9', 
+                cyanLight: '#e0f2fe',
+                purple: '#6366f1', 
+                purpleLight: '#eef2ff', 
+                accent: '#ef4444',
+              }
+            },
+            animation: {
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'slide-in': 'slideIn 0.5s ease-out forwards',
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+              'shimmer': 'shimmer 2s infinite',
+              'menu-item': 'menuItem 0.4s ease-out forwards',
+            },
+            keyframes: {
+              float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+              slideIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+              shimmer: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(100%)' } },
+              menuItem: { '0%': { opacity: '0', transform: 'translateX(-20px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
+            }
+          }
+        }
+      }
+    </script>
+
+    <style>
+      body { background-color: #f8fafc; color: #0f172a; }
+      html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #f1f5f9; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      .clip-angled { clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); }
+      .grid-bg-light {
+        background-size: 40px 40px;
+        background-image: linear-gradient(to right, rgba(15,23,42,0.05) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(15,23,42,0.05) 1px, transparent 1px);
+      }
+      .perspective-1000 { perspective: 1000px; }
+      .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 30px -10px rgba(14,165,233,0.15); }
+      
+      /* Mobile sidebar glassmorphism + staggered animation */
+      .glass-sidebar {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border-right: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 8px 0 32px -8px rgba(0,0,0,0.1);
+      }
+      .mobile-link {
+        opacity: 0;
+        animation: menuItem 0.4s ease-out forwards;
+      }
+      .mobile-link:nth-child(1) { animation-delay: 0.05s; }
+      .mobile-link:nth-child(2) { animation-delay: 0.1s; }
+      .mobile-link:nth-child(3) { animation-delay: 0.15s; }
+      .mobile-link:nth-child(4) { animation-delay: 0.2s; }
+      .mobile-link:nth-child(5) { animation-delay: 0.25s; }
+      .mobile-link:nth-child(6) { animation-delay: 0.3s; }
+      .mobile-link:nth-child(7) { animation-delay: 0.35s; }
+      .mobile-link:nth-child(8) { animation-delay: 0.4s; }
+      
+      .menu-profile {
+        opacity: 0;
+        animation: slideIn 0.5s ease-out 0.1s forwards;
+      }
+      .menu-footer {
+        opacity: 0;
+        animation: fadeIn 0.5s ease-out 0.45s forwards;
+      }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-cyan/20 selection:text-brand-dark overflow-x-hidden bg-slate-50">
+
+    <div id="app-content" class="opacity-100">
+        
+        <!-- ===== NAVBAR (unchanged, fixed) ===== -->
+        <nav id="navbar" class="fixed w-full z-30 transition-all duration-300 h-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+                <div class="flex items-center justify-between h-full"> 
+                    <a href="#home" class="flex items-center gap-3 group cursor-pointer z-50 nav-link-mobile">
+                        <div class="relative flex items-center justify-center w-10 h-10 bg-brand-cyan/10 border border-brand-cyan/20 clip-angled group-hover:bg-brand-cyan group-hover:text-white transition-all duration-300">
+                            <i data-lucide="code-2" class="relative w-5 h-5 text-brand-cyan group-hover:text-white"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-display font-bold text-lg text-slate-900 tracking-wider leading-none">
+                                PABITRA <span class="text-brand-cyan">KHANDUAL</span>
+                            </span>
+                            <span class="text-[9px] font-mono text-slate-500 tracking-[0.3em] leading-none mt-1 group-hover:text-brand-cyan transition-colors">
+                                FRONTEND DEVELOPER
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- Desktop Menu -->
+                    <div class="hidden md:flex items-center h-full">
+                        <div class="flex items-center bg-slate-100/50 border border-slate-200 rounded-sm px-6 py-2 gap-8 clip-angled backdrop-blur-sm">
+                            <a href="#home" class="text-xs font-bold text-slate-500 hover:text-brand-cyan transition-colors font-mono tracking-widest relative group">HOME<span class="absolute -bottom-1 left-0 w-0 h-[2px] bg-brand-cyan transition-all duration-300 group-hover:w-full"></span></a>
+                            <a href="#about" class="text-xs font-bold text-slate-500 hover:text-brand-cyan transition-colors font-mono tracking-widest relative group">ABOUT<span class="absolute -bottom-1 left-0 w-0 h-[2px] bg-brand-cyan transition-all duration-300 group-hover:w-full"></span></a>
+                            <a href="#skills" class="text-xs font-bold text-slate-500 hover:text-brand-cyan transition-colors font-mono tracking-widest relative group">SKILLS<span class="absolute -bottom-1 left-0 w-0 h-[2px] bg-brand-cyan transition-all duration-300 group-hover:w-full"></span></a>
+                            <a href="#services" class="text-xs font-bold text-slate-500 hover:text-brand-cyan transition-colors font-mono tracking-widest relative group">SERVICES<span class="absolute -bottom-1 left-0 w-0 h-[2px] bg-brand-cyan transition-all duration-300 group-hover:w-full"></span></a>
+                            <a href="#projects" class="text-xs font-bold text-slate-500 hover:text-brand-cyan transition-colors font-mono tracking-widest relative group">PROJECTS<span class="absolute -bottom-1 left-0 w-0 h-[2px] bg-brand-cyan transition-all duration-300 group-hover:w-full"></span></a>
+                            <a href="#blog" class="text-xs font-bold text-slate-500 hover:text-brand-cyan transition-colors font-mono tracking-widest relative group">BLOG<span class="absolute -bottom-1 left-0 w-0 h-[2px] bg-brand-cyan transition-all duration-300 group-hover:w-full"></span></a>
+                        </div>
+                        <div class="w-px h-8 bg-slate-200 mx-4"></div>
+                        <a href="#contact" class="group relative px-5 py-2.5 bg-brand-cyan text-white font-mono text-xs tracking-widest hover:bg-slate-900 transition-all duration-300 flex items-center gap-2 clip-angled shadow-lg shadow-brand-cyan/20 hover:shadow-none">
+                            <span class="relative z-10 font-bold">CONTACT ME</span>
+                            <i data-lucide="chevron-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <!-- Mobile Toggle Button - refined -->
+                    <div class="md:hidden z-50 flex items-center gap-2">
+                        <button id="menu-toggle" class="relative w-12 h-12 flex items-center justify-center clip-angled bg-white/80 backdrop-blur-sm border border-slate-200 hover:border-brand-cyan hover:bg-brand-cyan/5 transition-all text-slate-900 focus:outline-none" aria-label="Toggle Menu">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="scroll-line" class="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-brand-purple via-brand-cyan to-transparent transition-transform duration-500 ease-in-out transform origin-left scale-x-0"></div>
+            </div>
+        </nav>
+
+        <!-- ===== ENHANCED MOBILE SIDEBAR – glassmorphism, sequential animation, premium UI ===== -->
+        <div id="mobile-backdrop" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm opacity-0 invisible transition-all duration-300 ease-out"></div>
+        
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] glass-sidebar shadow-2xl transform -translate-x-full transition-transform duration-400 ease-[cubic-bezier(0.25,0.1,0.25,1)] flex flex-col h-full border-r border-white/20">
+            
+            <!-- Premium close button with gradient bg -->
+            <div class="absolute top-5 right-5 z-50">
+                <button id="menu-close" class="p-2.5 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 text-slate-600 hover:bg-brand-cyan hover:text-white hover:border-brand-cyan transition-all duration-300 shadow-md">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col h-full overflow-y-auto overflow-x-hidden px-6 py-8">
+                
+                <!-- Profile card with gradient border & animation -->
+                <div class="menu-profile relative text-center mb-8">
+                    <div class="relative w-28 h-28 mx-auto mb-5">
+                        <div class="absolute inset-0 rounded-full bg-gradient-to-br from-brand-cyan to-brand-purple animate-pulse-slow"></div>
+                        <div class="absolute inset-1 rounded-full bg-white overflow-hidden clip-angled border-2 border-white">
+                            <img src="https://i.ibb.co/vv4R05ZL/IMG-20251102-154516.jpg" alt="Pabitra" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                    <h3 class="font-display font-bold text-2xl text-slate-900 tracking-tight">Pabitra Khandual</h3>
+                    <p class="font-mono text-xs text-brand-cyan tracking-widest mt-1 uppercase font-semibold bg-brand-cyan/10 inline-block px-4 py-1.5 rounded-full">frontend architect</p>
+                    <div class="flex justify-center gap-3 mt-5">
+                        <a href="#" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-brand-cyan hover:text-white transition-all shadow-sm hover:shadow-md"><i data-lucide="github" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-brand-cyan hover:text-white transition-all shadow-sm hover:shadow-md"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-brand-cyan hover:text-white transition-all shadow-sm hover:shadow-md"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-brand-cyan hover:text-white transition-all shadow-sm hover:shadow-md"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+
+                <!-- Divider with gradient -->
+                <div class="h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent my-2"></div>
+
+                <!-- Navigation links – sequential animation class "mobile-link" -->
+                <div class="flex-1 flex flex-col gap-2 mt-4">
+                    <span class="text-[10px] font-mono text-slate-400 font-bold tracking-widest mb-1 uppercase px-2">navigation</span>
+                    
+                    <a href="#home" class="mobile-link group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-cyan/10 hover:to-transparent transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-brand-cyan/10 flex items-center justify-center text-brand-cyan group-hover:bg-brand-cyan group-hover:text-white transition-colors shadow-sm"><i data-lucide="home" class="w-4 h-4"></i></div>
+                        <span class="font-display font-medium text-slate-700 group-hover:text-slate-900 text-base">Home</span>
+                    </a>
+                    <a href="#about" class="mobile-link group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-cyan/10 hover:to-transparent transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-brand-purple/10 flex items-center justify-center text-brand-purple group-hover:bg-brand-purple group-hover:text-white transition-colors shadow-sm"><i data-lucide="user" class="w-4 h-4"></i></div>
+                        <span class="font-display font-medium text-slate-700 group-hover:text-slate-900 text-base">About</span>
+                    </a>
+                    <a href="#skills" class="mobile-link group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-cyan/10 hover:to-transparent transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors shadow-sm"><i data-lucide="zap" class="w-4 h-4"></i></div>
+                        <span class="font-display font-medium text-slate-700 group-hover:text-slate-900 text-base">Skills</span>
+                    </a>
+                    <a href="#services" class="mobile-link group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-cyan/10 hover:to-transparent transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors shadow-sm"><i data-lucide="briefcase" class="w-4 h-4"></i></div>
+                        <span class="font-display font-medium text-slate-700 group-hover:text-slate-900 text-base">Services</span>
+                    </a>
+                    <a href="#projects" class="mobile-link group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-cyan/10 hover:to-transparent transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-brand-cyan/10 flex items-center justify-center text-brand-cyan group-hover:bg-brand-cyan group-hover:text-white transition-colors shadow-sm"><i data-lucide="layers" class="w-4 h-4"></i></div>
+                        <span class="font-display font-medium text-slate-700 group-hover:text-slate-900 text-base">Projects</span>
+                    </a>
+                    <a href="#certifications" class="mobile-link group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-cyan/10 hover:to-transparent transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors shadow-sm"><i data-lucide="award" class="w-4 h-4"></i></div>
+                        <span class="font-display font-medium text-slate-700 group-hover:text-slate-900 text-base">Certificates</span>
+                    </a>
+                    <a href="#blog" class="mobile-link group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-cyan/10 hover:to-transparent transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-pink-100 flex items-center justify-center text-pink-500 group-hover:bg-pink-500 group-hover:text-white transition-colors shadow-sm"><i data-lucide="book-open" class="w-4 h-4"></i></div>
+                        <span class="font-display font-medium text-slate-700 group-hover:text-slate-900 text-base">Blog</span>
+                    </a>
+                    <a href="#contact" class="mobile-link group flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-cyan/10 hover:to-transparent transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center text-white group-hover:bg-brand-cyan transition-colors shadow-sm"><i data-lucide="mail" class="w-4 h-4"></i></div>
+                        <span class="font-display font-medium text-slate-700 group-hover:text-slate-900 text-base">Contact</span>
+                    </a>
+                </div>
+
+                <!-- Footer CTA – animated separately -->
+                <div class="menu-footer mt-8 pt-4 border-t border-slate-200/50">
+                    <a href="#" class="block w-full text-center py-3.5 px-4 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-brand-cyan hover:to-brand-purple text-white font-mono text-xs font-bold tracking-widest clip-angled transition-all duration-300 shadow-lg shadow-brand-cyan/20 hover:shadow-xl">
+                        <i data-lucide="download" class="inline w-4 h-4 mr-2"></i> DOWNLOAD RESUME
+                    </a>
+                    <p class="text-center text-[10px] font-mono text-slate-400 mt-4">✦ available for freelance ✦</p>
+                </div>
+            </div>
+        </div>
+
+        <main>
+            <!-- ===== HERO SECTION (kept clean, same as before) ===== -->
+            <section id="home" class="relative overflow-hidden bg-slate-50 min-h-screen flex items-center pt-20">
+                <div class="absolute inset-0 z-0 pointer-events-none">
+                    <div class="absolute inset-0 grid-bg-light opacity-60"></div>
+                    <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-brand-cyan/5 rounded-full blur-[100px] animate-pulse-slow"></div>
+                    <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-brand-purple/5 rounded-full blur-[100px] animate-pulse-slow delay-1000"></div>
+                </div>
+                <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+                    <div class="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+                        <!-- Text Content (60%) -->
+                        <div class="lg:w-3/5 text-left animate-slide-in">
+                            <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur border border-slate-200 rounded-full px-4 py-1.5 mb-8 shadow-sm hover:border-brand-cyan/50 transition-colors cursor-default">
+                                <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span></span>
+                                <span class="text-[7px] font-mono font-bold text-slate-600 tracking-wide">AVAILABLE FOR NEW OPPORTUNITIES</span>
+                            </div>
+                            <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-slate-900 mb-6 leading-[1.1] tracking-tight">
+                                Hi, I'm<br/>
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-blue-600">PABITRA KHANDUAL</span>
+                            </h1>
+                            <p class="text-slate-600 text-base md:text-lg leading-relaxed mb-8 font-light max-w-xl">
+                                A passionate frontend developer with a strong foundation in modern web technologies. I build responsive, user‑friendly applications with clean code and creative flair.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                                <a href="#projects" class="group relative px-8 py-4 bg-slate-900 text-white font-bold font-display tracking-widest hover:bg-brand-cyan transition-colors duration-300 clip-angled text-center shadow-lg hover:shadow-brand-cyan/50 w-full sm:w-auto">
+                                    <span class="relative z-10 flex items-center justify-center">VIEW PROJECTS <i data-lucide="arrow-right" class="ml-2 w-4 h-4"></i></span>
+                                </a>
+                                <a href="mailto:sayhello2pabitra@gmail.com" class="group px-8 py-4 border border-slate-300 text-slate-900 font-bold font-display tracking-widest hover:border-brand-cyan hover:text-brand-cyan transition-all duration-300 clip-angled text-center bg-white w-full sm:w-auto">
+                                    GET IN TOUCH
+                                </a>
+                            </div>
+                            <!-- Social + Stats -->
+                            <div class="flex items-center gap-6 mt-4 flex-wrap">
+                                <span class="font-mono text-xs font-bold text-slate-400">FOLLOW ME ON</span>
+                                <div class="w-px h-8 bg-slate-200"></div>
+                                <div class="flex gap-3">
+                                    <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-brand-cyan hover:text-white transition-all duration-300 hover:scale-110"><i data-lucide="github" class="w-5 h-5"></i></a>
+                                    <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-brand-cyan hover:text-white transition-all duration-300 hover:scale-110"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+                                    <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-brand-cyan hover:text-white transition-all duration-300 hover:scale-110"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                                </div>
+                            </div>
+                            <!-- Stats -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-y border-slate-200/60 py-3 mt-8 bg-white/50 backdrop-blur-sm rounded-xl w-full max-w-md">
+                                <div class="text-center border-r border-slate-200 last:border-0 px-2"><div class="text-2xl md:text-3xl font-display font-bold text-slate-900">1+</div><div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider mt-1 font-bold">Years Exp.</div></div>
+                                <div class="text-center border-r border-slate-200 last:border-0 px-2"><div class="text-2xl md:text-3xl font-display font-bold text-slate-900">25+</div><div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider mt-1 font-bold">Projects</div></div>
+                                <div class="text-center border-r border-slate-200 last:border-0 px-2"><div class="text-2xl md:text-3xl font-display font-bold text-slate-900">200+</div><div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider mt-1 font-bold">Working Hours</div></div>
+                                <div class="text-center px-2"><div class="text-2xl md:text-3xl font-display font-bold text-slate-900">5+</div><div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider mt-1 font-bold">Langs</div></div>
+                            </div>
+                        </div>
+                        <!-- Image (40%) -->
+                        <div class="lg:w-2/5 flex items-center justify-center">
+                            <div class="group relative w-full max-w-sm lg:max-w-md">
+                                <div class="absolute inset-0 bg-slate-200 clip-angled transform -rotate-6 transition-transform duration-500 group-hover:rotate-0"></div>
+                                <div class="absolute -inset-1 bg-gradient-to-br from-brand-cyan to-brand-purple clip-angled transform rotate-6 transition-transform duration-500 group-hover:rotate-0"></div>
+                                <div class="relative w-full h-full clip-angled overflow-hidden shadow-2xl bg-white aspect-square">
+                                    <img src="https://i.ibb.co/vv4R05ZL/IMG-20251102-154516.jpg" alt="Pabitra Khandual" class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== ABOUT SECTION (refreshed) ===== -->
+            <section id="about" class="py-24 bg-white relative overflow-hidden border-y border-slate-100">
+                <div class="absolute inset-0 grid-bg-light opacity-20 pointer-events-none"></div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div class="flex flex-col items-center text-center mb-16">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-brand-cyan"></div>
+                            <span class="text-brand-cyan font-mono text-xs tracking-[0.4em] uppercase font-bold">MY STORY</span>
+                            <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-brand-cyan"></div>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 uppercase tracking-tighter relative inline-block">
+                            ABOUT ME
+                            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-brand-cyan"></div>
+                        </h2>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-12 items-start">
+                        <div class="space-y-6 text-slate-600">
+                            <p class="text-lg leading-relaxed">I'm <span class="font-bold text-slate-900">Pabitra Khandual</span>, a frontend developer based in India. I discovered my passion for coding while building my first website in high school — since then, I've been on a journey to master the art of web development.</p>
+                            <p class="text-lg leading-relaxed">I specialize in creating <span class="text-brand-cyan font-medium">responsive, accessible, and performant</span> interfaces. Beyond HTML, CSS, and JavaScript, I love exploring UI/UX principles and bringing designs to life with Tailwind, Bootstrap, and React.</p>
+                            <p class="text-lg leading-relaxed">Currently, I'm expanding my skills in backend technologies (Node.js, Python) to become a more versatile developer. I'm open to freelance projects and full‑time opportunities.</p>
+                            <div class="pt-4">
+                                <a href="#contact" class="inline-flex items-center gap-2 px-6 py-3 bg-brand-cyan text-white font-mono text-xs tracking-widest hover:bg-slate-900 transition clip-angled shadow-md shadow-brand-cyan/30"><i data-lucide="send" class="w-4 h-4"></i> HIRE ME</a>
+                                <a href="#" class="inline-flex items-center gap-2 ml-4 px-6 py-3 border border-slate-300 text-slate-700 font-mono text-xs tracking-widest hover:border-brand-cyan hover:text-brand-cyan transition clip-angled"><i data-lucide="file-text" class="w-4 h-4"></i> RESUME</a>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-8 clip-angled border border-slate-200 shadow-lg">
+                            <h3 class="font-display font-bold text-xl text-slate-800 mb-6 flex items-center gap-2"><i data-lucide="info" class="w-5 h-5 text-brand-cyan"></i> PERSONAL INFO</h3>
+                            <div class="space-y-4">
+                                <div class="flex border-b border-slate-200 pb-3"><span class="font-mono text-xs font-bold text-slate-500 w-28">FULL NAME</span><span class="text-slate-800 font-medium">Pabitra Khandual</span></div>
+                                <div class="flex border-b border-slate-200 pb-3"><span class="font-mono text-xs font-bold text-slate-500 w-28">EMAIL</span><span class="text-slate-800">sayhello2pabitra@gmail.com</span></div>
+                                <div class="flex border-b border-slate-200 pb-3"><span class="font-mono text-xs font-bold text-slate-500 w-28">LOCATION</span><span class="text-slate-800">Odisha, India</span></div>
+                                <div class="flex border-b border-slate-200 pb-3"><span class="font-mono text-xs font-bold text-slate-500 w-28">LANGUAGES</span><span class="text-slate-800">English, Hindi, Odia</span></div>
+                                <div class="flex"><span class="font-mono text-xs font-bold text-slate-500 w-28">FREELANCE</span><span class="text-green-600 font-bold">AVAILABLE</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== SKILLS SECTION (already expanded, kept) ===== -->
+            <section id="skills" class="py-24 bg-slate-50 relative overflow-hidden">
+                <div class="absolute inset-0 grid-bg-light opacity-40 pointer-events-none"></div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div class="flex flex-col items-center text-center mb-16">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-brand-cyan"></div>
+                            <span class="text-brand-cyan font-mono text-xs tracking-[0.4em] uppercase font-bold">MY ARSENAL</span>
+                            <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-brand-cyan"></div>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 uppercase tracking-tighter relative inline-block">
+                            Technical Skills
+                            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-brand-cyan"></div>
+                        </h2>
+                    </div>
+                    
+                    <!-- Core skills with levels (unchanged) -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
+                        <!-- icons and skill cards (kept same) -->
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-orange-50 group-hover:bg-orange-500 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML5" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">HTML5</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Expert</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-blue-50 group-hover:bg-blue-500 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS3" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">CSS3</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Expert</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-yellow-50 group-hover:bg-yellow-500 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JavaScript" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">JavaScript</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Advanced</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-green-50 group-hover:bg-green-600 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">Python</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Intermediate</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-slate-100 group-hover:bg-slate-700 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg" alt="C" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">C Language</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Intermediate</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-teal-50 group-hover:bg-teal-600 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/arduino/arduino-original.svg" alt="Arduino" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">Arduino</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Intermediate</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-cyan-50 group-hover:bg-brand-cyan transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">React</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Learning</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-sky-50 group-hover:bg-sky-500 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" alt="Tailwind" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">Tailwind</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Advanced</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-red-50 group-hover:bg-red-500 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" alt="Git" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">Git/GitHub</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Advanced</span>
+                        </div>
+                        <div class="group relative bg-white border border-slate-200 p-6 hover:border-brand-cyan/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 clip-angled flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-purple-50 group-hover:bg-purple-600 transition shadow-sm"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg" alt="Bootstrap" class="w-8 h-8"></div>
+                            <h3 class="text-sm font-display font-bold text-slate-700 group-hover:text-brand-cyan uppercase">Bootstrap</h3><span class="text-[10px] font-mono text-slate-400 mt-1">Advanced</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 text-center">
+                        <span class="inline-block px-4 py-2 bg-white border border-slate-200 rounded-full text-xs font-mono text-slate-500 mb-6 shadow-sm">➕ OTHER TOOLS I USE</span>
+                        <div class="flex flex-wrap justify-center gap-3">
+                            <span class="px-4 py-2 bg-white border border-slate-200 rounded-full text-xs font-mono text-slate-700 hover:border-brand-cyan hover:text-brand-cyan transition">Figma</span>
+                            <span class="px-4 py-2 bg-white border border-slate-200 rounded-full text-xs font-mono text-slate-700 hover:border-brand-cyan hover:text-brand-cyan transition">VS Code</span>
+                            <span class="px-4 py-2 bg-white border border-slate-200 rounded-full text-xs font-mono text-slate-700 hover:border-brand-cyan hover:text-brand-cyan transition">Postman</span>
+                            <span class="px-4 py-2 bg-white border border-slate-200 rounded-full text-xs font-mono text-slate-700 hover:border-brand-cyan hover:text-brand-cyan transition">Vercel</span>
+                            <span class="px-4 py-2 bg-white border border-slate-200 rounded-full text-xs font-mono text-slate-700 hover:border-brand-cyan hover:text-brand-cyan transition">Netlify</span>
+                            <span class="px-4 py-2 bg-white border border-slate-200 rounded-full text-xs font-mono text-slate-700 hover:border-brand-cyan hover:text-brand-cyan transition">WordPress</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== NEW: SERVICES SECTION ===== -->
+            <section id="services" class="py-24 bg-white relative border-y border-slate-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col items-center text-center mb-16">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-brand-cyan"></div>
+                            <span class="text-brand-cyan font-mono text-xs tracking-[0.4em] uppercase font-bold">WHAT I DO</span>
+                            <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-brand-cyan"></div>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 uppercase tracking-tighter relative inline-block">
+                            MY SERVICES
+                            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-brand-cyan"></div>
+                        </h2>
+                    </div>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="group bg-slate-50 p-8 clip-angled border border-slate-200 hover:border-brand-cyan/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                            <div class="w-16 h-16 rounded-2xl bg-brand-cyan/10 flex items-center justify-center mb-6 group-hover:bg-brand-cyan group-hover:text-white transition"><i data-lucide="code-2" class="w-8 h-8 text-brand-cyan group-hover:text-white"></i></div>
+                            <h3 class="text-xl font-display font-bold text-slate-900 mb-2 group-hover:text-brand-cyan">Web Development</h3>
+                            <p class="text-slate-500 text-sm leading-relaxed">Responsive, mobile-first websites with modern HTML5, CSS3, JavaScript, and Tailwind.</p>
+                        </div>
+                        <div class="group bg-slate-50 p-8 clip-angled border border-slate-200 hover:border-brand-cyan/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                            <div class="w-16 h-16 rounded-2xl bg-brand-cyan/10 flex items-center justify-center mb-6 group-hover:bg-brand-cyan group-hover:text-white transition"><i data-lucide="smartphone" class="w-8 h-8 text-brand-cyan group-hover:text-white"></i></div>
+                            <h3 class="text-xl font-display font-bold text-slate-900 mb-2 group-hover:text-brand-cyan">Responsive Design</h3>
+                            <p class="text-slate-500 text-sm leading-relaxed">Pixel-perfect layouts that work seamlessly on every device — from mobile to desktop.</p>
+                        </div>
+                        <div class="group bg-slate-50 p-8 clip-angled border border-slate-200 hover:border-brand-cyan/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                            <div class="w-16 h-16 rounded-2xl bg-brand-cyan/10 flex items-center justify-center mb-6 group-hover:bg-brand-cyan group-hover:text-white transition"><i data-lucide="gauge" class="w-8 h-8 text-brand-cyan group-hover:text-white"></i></div>
+                            <h3 class="text-xl font-display font-bold text-slate-900 mb-2 group-hover:text-brand-cyan">Performance Opt.</h3>
+                            <p class="text-slate-500 text-sm leading-relaxed">Optimize loading speed, Core Web Vitals, and Lighthouse scores for better UX & SEO.</p>
+                        </div>
+                        <div class="group bg-slate-50 p-8 clip-angled border border-slate-200 hover:border-brand-cyan/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                            <div class="w-16 h-16 rounded-2xl bg-brand-cyan/10 flex items-center justify-center mb-6 group-hover:bg-brand-cyan group-hover:text-white transition"><i data-lucide="git-branch" class="w-8 h-8 text-brand-cyan group-hover:text-white"></i></div>
+                            <h3 class="text-xl font-display font-bold text-slate-900 mb-2 group-hover:text-brand-cyan">Version Control</h3>
+                            <p class="text-slate-500 text-sm leading-relaxed">Git & GitHub workflows, collaboration, and deployment via Vercel/Netlify.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== PROJECTS SECTION (6 items with fresh images) ===== -->
+            <section id="projects" class="py-24 bg-slate-50 relative">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col items-center text-center mb-16">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-brand-cyan"></div>
+                            <span class="text-brand-cyan font-mono text-xs tracking-[0.4em] uppercase font-bold">MY WORK</span>
+                            <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-brand-cyan"></div>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 uppercase tracking-tighter relative inline-block">
+                            Featured Projects
+                            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-brand-cyan"></div>
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- project 1-6 (same as previous – keep for brevity) -->
+                        <div class="group bg-white border border-slate-200 hover:border-brand-cyan/30 hover:shadow-2xl transition-all duration-300 clip-angled overflow-hidden">
+                            <div class="relative h-56 overflow-hidden"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop" alt="E-commerce" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" /><div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent"></div></div>
+                            <div class="p-6"><h3 class="text-xl font-bold text-slate-900 font-display mb-2 group-hover:text-brand-cyan">E‑COMMERCE PLATFORM</h3><p class="text-slate-500 text-sm mb-4">Full-stack store with auth, filtering, Stripe. MERN.</p><div class="flex flex-wrap gap-2 mb-4"><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">React</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">Node.js</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">MongoDB</span></div><a href="#" class="text-xs font-bold font-mono text-slate-900 flex items-center group-hover:text-brand-cyan">VIEW DETAILS <i data-lucide="arrow-right" class="ml-2 w-3 h-3"></i></a></div>
+                        </div>
+                        <div class="group bg-white border border-slate-200 hover:border-brand-cyan/30 hover:shadow-2xl transition-all duration-300 clip-angled overflow-hidden">
+                            <div class="relative h-56 overflow-hidden"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop" alt="Dashboard" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" /><div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent"></div></div>
+                            <div class="p-6"><h3 class="text-xl font-bold text-slate-900 font-display mb-2 group-hover:text-brand-cyan">DATA VIZ DASHBOARD</h3><p class="text-slate-500 text-sm mb-4">Interactive real‑time charts with D3.js & WebSocket.</p><div class="flex flex-wrap gap-2 mb-4"><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">Angular</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">TypeScript</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">D3.js</span></div><a href="#" class="text-xs font-bold font-mono text-slate-900 flex items-center group-hover:text-brand-cyan">VIEW DETAILS <i data-lucide="arrow-right" class="ml-2 w-3 h-3"></i></a></div>
+                        </div>
+                        <div class="group bg-white border border-slate-200 hover:border-brand-cyan/30 hover:shadow-2xl transition-all duration-300 clip-angled overflow-hidden">
+                            <div class="relative h-56 overflow-hidden"><img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&auto=format&fit=crop" alt="AI content" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" /><div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent"></div></div>
+                            <div class="p-6"><h3 class="text-xl font-bold text-slate-900 font-display mb-2 group-hover:text-brand-cyan">AI CONTENT GENERATOR</h3><p class="text-slate-500 text-sm mb-4">Marketing copy & blog posts using Gemini API.</p><div class="flex flex-wrap gap-2 mb-4"><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">Next.js</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">Tailwind</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">Gemini API</span></div><a href="#" class="text-xs font-bold font-mono text-slate-900 flex items-center group-hover:text-brand-cyan">VIEW DETAILS <i data-lucide="arrow-right" class="ml-2 w-3 h-3"></i></a></div>
+                        </div>
+                        <div class="group bg-white border border-slate-200 hover:border-brand-cyan/30 hover:shadow-2xl transition-all duration-300 clip-angled overflow-hidden">
+                            <div class="relative h-56 overflow-hidden"><img src="https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600&auto=format&fit=crop" alt="Portfolio" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" /><div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent"></div></div>
+                            <div class="p-6"><h3 class="text-xl font-bold text-slate-900 font-display mb-2 group-hover:text-brand-cyan">MINIMALIST PORTFOLIO</h3><p class="text-slate-500 text-sm mb-4">High‑performance template, dark mode & smooth scroll.</p><div class="flex flex-wrap gap-2 mb-4"><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">HTML5</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">Tailwind</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">JS</span></div><a href="#" class="text-xs font-bold font-mono text-slate-900 flex items-center group-hover:text-brand-cyan">VIEW DETAILS <i data-lucide="arrow-right" class="ml-2 w-3 h-3"></i></a></div>
+                        </div>
+                        <div class="group bg-white border border-slate-200 hover:border-brand-cyan/30 hover:shadow-2xl transition-all duration-300 clip-angled overflow-hidden">
+                            <div class="relative h-56 overflow-hidden"><img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&auto=format&fit=crop" alt="Weather" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" /><div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent"></div></div>
+                            <div class="p-6"><h3 class="text-xl font-bold text-slate-900 font-display mb-2 group-hover:text-brand-cyan">WEATHER FORECAST</h3><p class="text-slate-500 text-sm mb-4">Real‑time weather with geolocation, 5‑day forecast.</p><div class="flex flex-wrap gap-2 mb-4"><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">React</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">OpenWeather API</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">Axios</span></div><a href="#" class="text-xs font-bold font-mono text-slate-900 flex items-center group-hover:text-brand-cyan">VIEW DETAILS <i data-lucide="arrow-right" class="ml-2 w-3 h-3"></i></a></div>
+                        </div>
+                        <div class="group bg-white border border-slate-200 hover:border-brand-cyan/30 hover:shadow-2xl transition-all duration-300 clip-angled overflow-hidden">
+                            <div class="relative h-56 overflow-hidden"><img src="https://images.unsplash.com/photo-1555421689-491a97ff2040?w=600&auto=format&fit=crop" alt="Task manager" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" /><div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent"></div></div>
+                            <div class="p-6"><h3 class="text-xl font-bold text-slate-900 font-display mb-2 group-hover:text-brand-cyan">TASK FLOW</h3><p class="text-slate-500 text-sm mb-4">Drag‑drop task manager with local storage, filters.</p><div class="flex flex-wrap gap-2 mb-4"><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">JavaScript</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">Tailwind</span><span class="text-xs font-mono bg-brand-cyanLight px-2 py-0.5 rounded-full border border-brand-cyan/50">localStorage</span></div><a href="#" class="text-xs font-bold font-mono text-slate-900 flex items-center group-hover:text-brand-cyan">VIEW DETAILS <i data-lucide="arrow-right" class="ml-2 w-3 h-3"></i></a></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-12">
+                        <a href="#" class="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white font-mono text-xs tracking-widest hover:bg-brand-cyan transition clip-angled shadow-lg">VIEW ALL PROJECTS <i data-lucide="external-link" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== NEW: CERTIFICATIONS SECTION ===== -->
+            <section id="certifications" class="py-24 bg-white relative border-y border-slate-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col items-center text-center mb-16">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-brand-cyan"></div>
+                            <span class="text-brand-cyan font-mono text-xs tracking-[0.4em] uppercase font-bold">ACHIEVEMENTS</span>
+                            <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-brand-cyan"></div>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 uppercase tracking-tighter relative inline-block">
+                            CERTIFICATIONS
+                            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-brand-cyan"></div>
+                        </h2>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-slate-50 p-6 clip-angled border border-slate-200 flex items-center gap-4 hover:border-brand-cyan/50 transition-all hover:shadow-md">
+                            <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><i data-lucide="badge-check" class="w-6 h-6"></i></div>
+                            <div><h4 class="font-display font-bold text-slate-900">Responsive Web Design</h4><p class="text-xs font-mono text-slate-500">freeCodeCamp · 2024</p></div>
+                        </div>
+                        <div class="bg-slate-50 p-6 clip-angled border border-slate-200 flex items-center gap-4 hover:border-brand-cyan/50 transition-all hover:shadow-md">
+                            <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><i data-lucide="badge-check" class="w-6 h-6"></i></div>
+                            <div><h4 class="font-display font-bold text-slate-900">JavaScript Algorithms</h4><p class="text-xs font-mono text-slate-500">freeCodeCamp · 2024</p></div>
+                        </div>
+                        <div class="bg-slate-50 p-6 clip-angled border border-slate-200 flex items-center gap-4 hover:border-brand-cyan/50 transition-all hover:shadow-md">
+                            <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><i data-lucide="badge-check" class="w-6 h-6"></i></div>
+                            <div><h4 class="font-display font-bold text-slate-900">Frontend Development</h4><p class="text-xs font-mono text-slate-500">GreatLearning · 2023</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== NEW: BLOG / INSIGHTS SECTION ===== -->
+            <section id="blog" class="py-24 bg-slate-50 relative">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col items-center text-center mb-16">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-brand-cyan"></div>
+                            <span class="text-brand-cyan font-mono text-xs tracking-[0.4em] uppercase font-bold">INSIGHTS</span>
+                            <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-brand-cyan"></div>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 uppercase tracking-tighter relative inline-block">
+                            LATEST ARTICLES
+                            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-brand-cyan"></div>
+                        </h2>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="bg-white p-6 clip-angled border border-slate-200 hover:border-brand-cyan/30 transition hover:-translate-y-2 shadow-sm">
+                            <div class="text-brand-cyan text-xs font-mono mb-2">📅 15 Feb 2025</div>
+                            <h3 class="font-display font-bold text-lg text-slate-900 mb-3">Modern CSS with Tailwind</h3>
+                            <p class="text-slate-500 text-sm mb-4">Why utility‑first frameworks speed up development and keep code consistent.</p>
+                            <a href="#" class="text-xs font-mono text-brand-cyan font-bold flex items-center">Read more <i data-lucide="arrow-right" class="ml-1 w-3 h-3"></i></a>
+                        </div>
+                        <div class="bg-white p-6 clip-angled border border-slate-200 hover:border-brand-cyan/30 transition hover:-translate-y-2 shadow-sm">
+                            <div class="text-brand-cyan text-xs font-mono mb-2">📅 28 Jan 2025</div>
+                            <h3 class="font-display font-bold text-lg text-slate-900 mb-3">React Hooks Deep Dive</h3>
+                            <p class="text-slate-500 text-sm mb-4">useState, useEffect, custom hooks — how I structure complex logic.</p>
+                            <a href="#" class="text-xs font-mono text-brand-cyan font-bold flex items-center">Read more <i data-lucide="arrow-right" class="ml-1 w-3 h-3"></i></a>
+                        </div>
+                        <div class="bg-white p-6 clip-angled border border-slate-200 hover:border-brand-cyan/30 transition hover:-translate-y-2 shadow-sm">
+                            <div class="text-brand-cyan text-xs font-mono mb-2">📅 10 Jan 2025</div>
+                            <h3 class="font-display font-bold text-lg text-slate-900 mb-3">Performance Auditing</h3>
+                            <p class="text-slate-500 text-sm mb-4">How I improved Lighthouse score from 65 to 98 in one week.</p>
+                            <a href="#" class="text-xs font-mono text-brand-cyan font-bold flex items-center">Read more <i data-lucide="arrow-right" class="ml-1 w-3 h-3"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== TESTIMONIALS (kept, upgraded with hover) ===== -->
+            <section id="testimonials" class="py-24 bg-white relative border-y border-slate-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col items-center text-center mb-16">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-brand-cyan"></div>
+                            <span class="text-brand-cyan font-mono text-xs tracking-[0.4em] uppercase font-bold">SOCIAL PROOF</span>
+                            <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-brand-cyan"></div>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 uppercase tracking-tighter relative inline-block">
+                            CLIENTS FEEDBACK
+                            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-brand-cyan"></div>
+                        </h2>
+                    </div>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="bg-slate-50 p-8 clip-angled border border-slate-200 hover-lift transition shadow-lg">
+                            <div class="flex items-center gap-4 mb-6"><div class="w-14 h-14 rounded-full bg-gradient-to-br from-brand-cyan/20 to-brand-purple/20 flex items-center justify-center text-xl font-display font-bold text-brand-cyan border border-brand-cyan/30">A.K.</div><div><h4 class="font-display font-bold text-slate-900">Arun Kumar</h4><p class="text-xs font-mono text-slate-500">Startup Founder</p></div></div>
+                            <p class="text-slate-600 text-sm leading-relaxed">“Pabitra delivered our company landing page ahead of schedule. Pixel‑perfect, responsive, and extremely clean code.”</p>
+                            <div class="mt-4 flex text-brand-cyan"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        </div>
+                        <div class="bg-slate-50 p-8 clip-angled border border-slate-200 hover-lift transition shadow-lg">
+                            <div class="flex items-center gap-4 mb-6"><div class="w-14 h-14 rounded-full bg-gradient-to-br from-brand-cyan/20 to-brand-purple/20 flex items-center justify-center text-xl font-display font-bold text-brand-cyan border border-brand-cyan/30">S.P.</div><div><h4 class="font-display font-bold text-slate-900">Sunita Patra</h4><p class="text-xs font-mono text-slate-500">UI/UX Designer</p></div></div>
+                            <p class="text-slate-600 text-sm leading-relaxed">“Pabitra transformed my Figma design into a fully functional dashboard. He pays attention to micro‑interactions.”</p>
+                            <div class="mt-4 flex text-brand-cyan"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        </div>
+                        <div class="bg-slate-50 p-8 clip-angled border border-slate-200 hover-lift transition shadow-lg md:col-span-2 lg:col-span-1">
+                            <div class="flex items-center gap-4 mb-6"><div class="w-14 h-14 rounded-full bg-gradient-to-br from-brand-cyan/20 to-brand-purple/20 flex items-center justify-center text-xl font-display font-bold text-brand-cyan border border-brand-cyan/30">R.K.</div><div><h4 class="font-display font-bold text-slate-900">Rakesh Mohanty</h4><p class="text-xs font-mono text-slate-500">Tech Lead</p></div></div>
+                            <p class="text-slate-600 text-sm leading-relaxed">“Great communication, fast problem solving. Pabitra helped us fix critical UI bugs and improved Lighthouse score by 30 points.”</p>
+                            <div class="mt-4 flex text-brand-cyan"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== NEW: FUN FACTS / EXTRA ===== -->
+            <section class="py-16 bg-brand-cyan/5 border-y border-brand-cyan/10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <div class="flex flex-wrap justify-center gap-12 items-center">
+                        <div><span class="font-display text-4xl font-bold text-brand-cyan">50+</span><p class="text-xs font-mono text-slate-600 mt-2">CUP OF COFFEE</p></div>
+                        <div><span class="font-display text-4xl font-bold text-brand-cyan">10+</span><p class="text-xs font-mono text-slate-600 mt-2">HAPPY CLIENTS</p></div>
+                        <div><span class="font-display text-4xl font-bold text-brand-cyan">24/7</span><p class="text-xs font-mono text-slate-600 mt-2">SUPPORT</p></div>
+                        <div><span class="font-display text-4xl font-bold text-brand-cyan">3</span><p class="text-xs font-mono text-slate-600 mt-2">COUNTRIES</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CONTACT SECTION (2‑column with info & form) ===== -->
+            <div id="contact" class="relative bg-white">
+                <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-cyan/50 to-transparent"></div>
+                <div class="bg-white text-slate-600 pt-20 pb-16">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex flex-col items-center text-center mb-14">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-brand-cyan"></div>
+                                <span class="text-brand-cyan font-mono text-xs tracking-[0.4em] uppercase font-bold">GET IN TOUCH</span>
+                                <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-brand-cyan"></div>
+                            </div>
+                            <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 uppercase tracking-tighter relative inline-block">
+                                LET'S WORK TOGETHER
+                                <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-brand-cyan"></div>
+                            </h2>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+                            <div class="space-y-6">
+                                <div class="bg-slate-50 p-6 clip-angled border border-slate-200 flex items-center gap-5 hover:border-brand-cyan/50 transition shadow-sm"><div class="w-12 h-12 rounded-full bg-brand-cyan/10 flex items-center justify-center text-brand-cyan"><i data-lucide="mail" class="w-6 h-6"></i></div><div><span class="text-xs font-mono font-bold text-slate-500 uppercase">Email</span><p class="text-slate-800 font-medium">sayhello2pabitra@gmail.com</p></div></div>
+                                <div class="bg-slate-50 p-6 clip-angled border border-slate-200 flex items-center gap-5 hover:border-brand-cyan/50 transition shadow-sm"><div class="w-12 h-12 rounded-full bg-brand-cyan/10 flex items-center justify-center text-brand-cyan"><i data-lucide="map-pin" class="w-6 h-6"></i></div><div><span class="text-xs font-mono font-bold text-slate-500 uppercase">Location</span><p class="text-slate-800 font-medium">Bhubaneswar, Odisha</p></div></div>
+                                <div class="bg-slate-50 p-6 clip-angled border border-slate-200 flex items-center gap-5 hover:border-brand-cyan/50 transition shadow-sm"><div class="w-12 h-12 rounded-full bg-brand-cyan/10 flex items-center justify-center text-brand-cyan"><i data-lucide="clock" class="w-6 h-6"></i></div><div><span class="text-xs font-mono font-bold text-slate-500 uppercase">Response time</span><p class="text-slate-800 font-medium">Within 24 hours</p></div></div>
+                                <div class="flex gap-4 pt-4">
+                                    <a href="#" class="w-12 h-12 flex items-center justify-center border border-slate-200 rounded-full text-slate-500 hover:bg-brand-cyan hover:text-white transition-all"><i data-lucide="github" class="w-5 h-5"></i></a>
+                                    <a href="#" class="w-12 h-12 flex items-center justify-center border border-slate-200 rounded-full text-slate-500 hover:bg-brand-cyan hover:text-white transition-all"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+                                    <a href="#" class="w-12 h-12 flex items-center justify-center border border-slate-200 rounded-full text-slate-500 hover:bg-brand-cyan hover:text-white transition-all"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 p-8 clip-angled shadow-lg">
+                                <h3 class="font-display font-bold text-xl text-slate-900 mb-6">SEND A MESSAGE</h3>
+                                <form id="contact-form" class="space-y-6">
+                                    <div><label class="font-mono text-xs font-bold text-slate-500 tracking-widest">YOUR NAME</label><input type="text" class="w-full mt-2 bg-white border border-slate-300 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 p-3 text-sm outline-none" placeholder="e.g. John Doe" /></div>
+                                    <div><label class="font-mono text-xs font-bold text-slate-500 tracking-widest">EMAIL ADDRESS</label><input type="email" class="w-full mt-2 bg-white border border-slate-300 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 p-3 text-sm outline-none" placeholder="hello@example.com" /></div>
+                                    <div><label class="font-mono text-xs font-bold text-slate-500 tracking-widest">MESSAGE</label><textarea rows="4" class="w-full mt-2 bg-white border border-slate-300 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 p-3 text-sm outline-none" placeholder="Tell me about your project..."></textarea></div>
+                                    <button type="submit" class="group w-full relative px-8 py-4 bg-slate-900 text-white font-bold font-display tracking-widest hover:bg-brand-cyan transition-colors duration-300 clip-angled shadow-lg hover:shadow-brand-cyan/50">
+                                        SEND MESSAGE <i data-lucide="send" class="inline ml-2 w-4 h-4"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ===== FOOTER (elevated) ===== -->
+        <footer class="bg-slate-900 text-slate-300 pt-16 pb-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-slate-800">
+                    <div><div class="flex items-center gap-2 mb-4"><div class="w-8 h-8 bg-brand-cyan/20 clip-angled flex items-center justify-center"><i data-lucide="code-2" class="w-4 h-4 text-brand-cyan"></i></div><span class="font-display font-bold text-white text-lg">PABITRA</span></div><p class="text-sm leading-relaxed text-slate-400">Frontend developer crafting modern web experiences with clean, efficient code.</p></div>
+                    <div><h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4">Quick Links</h4><ul class="space-y-2 text-sm"><li><a href="#about" class="hover:text-brand-cyan transition">About</a></li><li><a href="#skills" class="hover:text-brand-cyan transition">Skills</a></li><li><a href="#services" class="hover:text-brand-cyan transition">Services</a></li><li><a href="#projects" class="hover:text-brand-cyan transition">Projects</a></li></ul></div>
+                    <div><h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4">Services</h4><ul class="space-y-2 text-sm"><li class="hover:text-brand-cyan transition">Web Development</li><li class="hover:text-brand-cyan transition">Responsive Design</li><li class="hover:text-brand-cyan transition">Performance Opt.</li><li class="hover:text-brand-cyan transition">UI Implementation</li></ul></div>
+                    <div><h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4">Connect</h4><div class="flex gap-4"><a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-brand-cyan hover:text-white transition"><i data-lucide="github" class="w-5 h-5"></i></a><a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-brand-cyan hover:text-white transition"><i data-lucide="linkedin" class="w-5 h-5"></i></a><a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-brand-cyan hover:text-white transition"><i data-lucide="instagram" class="w-5 h-5"></i></a></div></div>
+                </div>
+                <div class="pt-8 flex flex-col md:flex-row justify-between items-center text-xs font-mono text-slate-500">
+                    <span id="copyright"></span>
+                    <span class="mt-2 md:mt-0">DESIGNED & BUILT WITH <i data-lucide="heart" class="inline w-3 h-3 text-red-400 fill-current"></i> BY PABITRA</span>
+                </div>
+            </div>
+        </footer>
+
+        <button id="back-to-top" class="fixed bottom-6 right-6 w-12 h-12 flex items-center justify-center bg-brand-cyan text-white rounded-full shadow-lg transition-all duration-300 z-50 hover:bg-slate-900 opacity-0 translate-y-4" aria-label="Back to top">
+            <i data-lucide="arrow-up" class="w-5 h-5"></i>
+        </button>
+    </div>
+
+    <script>
+        // Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            document.getElementById('copyright').innerHTML = `&copy; ${new Date().getFullYear()} PABITRA KHANDUAL. All Rights Reserved.`;
+        });
+
+        // Navbar scroll
+        const nav = document.getElementById('navbar');
+        const scrollLine = document.getElementById('scroll-line');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                nav.classList.add('bg-white/95', 'backdrop-blur-lg', 'shadow-lg', 'shadow-brand-cyan/10');
+                scrollLine.classList.remove('scale-x-0');
+                scrollLine.classList.add('scale-x-100');
+            } else {
+                nav.classList.remove('bg-white/95', 'backdrop-blur-lg', 'shadow-lg', 'shadow-brand-cyan/10');
+                scrollLine.classList.add('scale-x-0');
+                scrollLine.classList.remove('scale-x-100');
+            }
+        });
+
+        // Mobile menu - enhanced sidebar with glassmorphism
+        const menuBtn = document.getElementById('menu-toggle');
+        const menuCloseBtn = document.getElementById('menu-close');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const backdrop = document.getElementById('mobile-backdrop');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+        const navLinkMobile = document.querySelector('.nav-link-mobile');
+
+        if (menuBtn && mobileMenu && backdrop) {
+            const openMenu = () => {
+                backdrop.classList.remove('invisible', 'opacity-0');
+                backdrop.classList.add('visible', 'opacity-100');
+                mobileMenu.classList.remove('-translate-x-full');
+                mobileMenu.classList.add('translate-x-0');
+                document.body.style.overflow = 'hidden';
+            };
+            const closeMenu = () => {
+                backdrop.classList.remove('visible', 'opacity-100');
+                backdrop.classList.add('invisible', 'opacity-0');
+                mobileMenu.classList.remove('translate-x-0');
+                mobileMenu.classList.add('-translate-x-full');
+                document.body.style.overflow = 'auto';
+            };
+            menuBtn.addEventListener('click', openMenu);
+            if(menuCloseBtn) menuCloseBtn.addEventListener('click', closeMenu);
+            backdrop.addEventListener('click', closeMenu);
+            mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
+            if(navLinkMobile) navLinkMobile.addEventListener('click', closeMenu);
+        }
+
+        // Back to top
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                backToTopBtn.classList.remove('opacity-0', 'translate-y-4');
+                backToTopBtn.classList.add('opacity-100', 'translate-y-0');
+            } else {
+                backToTopBtn.classList.add('opacity-0', 'translate-y-4');
+                backToTopBtn.classList.remove('opacity-100', 'translate-y-0');
+            }
+        });
+        backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    </script>
+</body>
+</html>
